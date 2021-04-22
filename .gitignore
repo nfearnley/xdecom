@@ -1,0 +1,5 @@
+out
+/.vscode
+/data/UFO2P.EXE
+*.code-workspace
+*.pyc
