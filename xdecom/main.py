@@ -1,8 +1,9 @@
+from pathlib import Path
 import json
 from enum import Enum
 from xdecom import offsets
 from xdecom.utils import read_data
-from xdecom.structures import strtab, research, facilitydata
+from xdecom.structures import strtab, researchdata, facilitydata
 
 
 def to_json(o):
@@ -16,34 +17,37 @@ def dump_json(o, f):
 
 
 def decom(f):
+    outpath = Path("out")
+    outpath.mkdir(parents=True, exist_ok=True)
     names = strtab.dump(read_data(f, *offsets.RESEARCH_NAME_STRTAB))
     descriptions = strtab.dump(read_data(f, *offsets.RESEARCH_DESCRIPTION_STRTAB))
-    entries = research.dump_all(read_data(f, *offsets.RESEARCH_DATA))
+    entries = researchdata.dump_all(read_data(f, *offsets.RESEARCH_DATA))
     for n, r in enumerate(entries):
         r.name = names[n]
         r.description = descriptions[n]
-    with open("out/research.json", "w") as f:
-        dump_json(entries, f)
+    with (outpath / "research.json").open("w") as outf:
+        dump_json(entries, outf)
 
     equipment = strtab.dump(read_data(f, *offsets.AGENT_EQUIPMENT_NAMES))
-    with open("out/equipment.json", "w") as f:
-        dump_json(equipment, f)
+    with (outpath / "equipment.json").open("w") as outf:
+        dump_json(equipment, outf)
 
     agents = strtab.dump(read_data(f, *offsets.AGENT_TYPE_NAMES))
-    with open("out/agents.json", "w") as f:
-        dump_json(agents, f)
+    with (outpath / "agents.json").open("w") as outf:
+        dump_json(agents, outf)
 
     strtabs = strtab.dump_all(read_data(f, *offsets.STRTABS))
-    with open("out/strtabs.json", "w") as f:
-        dump_json(strtabs, f)
+    with (outpath / "strtabs.json").open("w") as outf:
+        dump_json(strtabs, outf)
 
     facilitydatas = facilitydata.dump_all(read_data(f, *offsets.FACILITY_DATA))
-    with open("out/facilitydata.json", "w") as f:
-        dump_json(facilitydatas, f)
+    with (outpath / "facilitydata.json").open("w") as outf:
+        dump_json(facilitydatas, outf)
 
 
 def main():
-    with open("data/UFO2P.EXE", "rb") as f:
+    exepath = Path("data/UFO2P.EXE")
+    with exepath.open("rb") as f:
         decom(f)
 
 
